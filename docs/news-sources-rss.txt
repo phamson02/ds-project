@@ -12,26 +12,29 @@ https://soha.vn/thoi-su-xa-hoi.rss
 https://www.nguoiduatin.vn/rss/chinh-tri-xa-hoi.rss
 https://www.nguoiduatin.vn/rss/phap-luat.rss
 https://www.vietnamplus.vn/rss/news.rss
-https://kienthuc.net.vn/rss/home.rss
 https://kienthuc.net.vn/rss/xa-hoi-24.
 https://kinhtedothi.vn/thoi-su.rss
 https://vtc.vn/rss/thoi-su.rss
 https://infonet.vietnamnet.vn/rss/doi-song.rss
-https://tienphong.vn/rss/home.rss
-https://tapchigiaothong.vn/rss/home.rss
 https://tapchigiaothong.vn/rss/su-kien.rss
 https://vnanet.vn/vi/rss/chinh-tri-11.rss
 https://vnanet.vn/vi/rss/xa-hoi-14.rss
-https://plo.vn/rss/home.rss
 https://plo.vn/rss/thoi-su-1.rss
 https://plo.vn/rss/thoi-su/chinh-tri-2.rss
-https://www.sggp.org.vn/rss/home.rss
 https://www.sggp.org.vn/rss/chinh-tri-24.rss
 https://www.sggp.org.vn/rss/xa-hoi-199.rss
-https://toquoc.vn/rss/home.rss
 https://toquoc.vn/rss/thoi-su-1.rss
-https://giaoducthudo.giaoducthoidai.vn/rss/trang-chu
 https://giaoducthudo.giaoducthoidai.vn/rss/thoi-su
+
+-------------------
+
+https://kienthuc.net.vn/rss/home.rss
+https://tienphong.vn/rss/home.rss
+https://tapchigiaothong.vn/rss/home.rss
+https://plo.vn/rss/home.rss
+https://www.sggp.org.vn/rss/home.rss
+https://toquoc.vn/rss/home.rss
+https://giaoducthudo.giaoducthoidai.vn/rss/trang-chu
 
 --------------------
 Loi format
