@@ -8,8 +8,6 @@ def scrape_rss(rss_link, category=None):
     with open('docs/excluded-sources.txt', 'r') as f:
         excluded_sources = f.read().splitlines()
 
-    print(excluded_sources)
-
     articles = []
     for item in rss['items']:
         # check if source is excluded

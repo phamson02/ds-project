@@ -25,9 +25,7 @@ https://www.sggp.org.vn/rss/chinh-tri-24.rss
 https://www.sggp.org.vn/rss/xa-hoi-199.rss
 https://toquoc.vn/rss/thoi-su-1.rss
 https://giaoducthudo.giaoducthoidai.vn/rss/thoi-su
-
 -------------------
-
 https://kienthuc.net.vn/rss/home.rss
 https://tienphong.vn/rss/home.rss
 https://tapchigiaothong.vn/rss/home.rss
@@ -35,12 +33,10 @@ https://plo.vn/rss/home.rss
 https://www.sggp.org.vn/rss/home.rss
 https://toquoc.vn/rss/home.rss
 https://giaoducthudo.giaoducthoidai.vn/rss/trang-chu
-
 --------------------
 Loi format
 --------------------
 https://cdn.24h.com.vn/upload/rss/tintuctrongngay.rss
-
 --------------------
 Khong the lay duoc noi dung RSS
 --------------------
