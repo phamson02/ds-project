@@ -16,7 +16,7 @@ if __name__ == '__main__':
     # Read till meet '----' to stop
     with open('docs/news-sources-rss.txt', 'r') as f:
         for line in f:
-            if '----' in line.strip():
+            if 'STOP' in line.strip():
                 break
             rss_links.append(line.strip())
 
