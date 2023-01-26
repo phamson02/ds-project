@@ -1,41 +1,79 @@
+import argparse
+import datetime
+import os
 import pandas as pd
 import newspaper
+import feedparser
 from newspaper import Article
+from dateutil.parser import parse
+import pytz
+
 from exceptions import open_vnnet_article
 
-from rss_reader import scrape_rss
 
 def article_content_scraper(article_link):
+    '''Scrape article content from article_link'''
     article = Article(article_link)
     article.download()
     article.parse()
     return article.text
 
-if __name__ == '__main__':
-    rss_links = []
-    # Read till meet '----' to stop
-    with open('docs/news-sources-rss.txt', 'r') as f:
-        for line in f:
-            if 'STOP' in line.strip():
-                break
-            rss_links.append(line.strip())
+def scrape_rss(rss_link, category=None, today_only=False):
+    '''Scrape all articles' link from rss_link'''
+    rss = feedparser.parse(rss_link)
 
-    # Scrape all articles' link from rss_link
+    # load all excluded sources
+    with open('docs/excluded-sources.txt', 'r') as f:
+        excluded_sources = f.read().splitlines()
+
+    if today_only:
+        vietnam_tz = pytz.timezone('Asia/Ho_Chi_Minh')
+        today = datetime.datetime.now(tz=vietnam_tz)
+        today = today.strftime('%Y-%m-%d')
+
+        rss['items'] = [item for item in rss['items'] if parse(item['published']).strftime('%Y-%m-%d') == today]
+
     articles = []
     err_articles = []
-    for rss_link in rss_links:
-        print('Scraping', rss_link)
-        articles += scrape_rss(rss_link)
-        for article in articles:
-            if 'vnnet.vn' in article[0]:
-                article[0] = open_vnnet_article(article[0])
+    for item in rss['items']:
+        # check if source is excluded
+        excluded = any(source in item['link'] for source in excluded_sources)
+        if not excluded:
+            article = [item['link'], item['title'], parse(item['published']).strftime('%Y-%m-%d'), category]
+            articles.append(article)
 
-            try:
-                article.append(article_content_scraper(article[0]))
-            except newspaper.article.ArticleException:
-                article.append('')
-                err_articles.append(article[0])
-        
+    for article in articles:
+        # Article links from vnnet.vn need special treatment
+        if 'vnnet.vn' in article[0]:
+            article[0] = open_vnnet_article(article[0])
+
+        try:
+            article.append(article_content_scraper(article[0]))
+        except newspaper.article.ArticleException:
+            article.append('')
+            err_articles.append(article[0])
+
+    return articles, err_articles
+
+def main(args):
+    # Get all file dir in docs/news-sources
+    files = os.listdir('docs/news-sources')
+    
+    articles = []
+    err_articles = []
+
+    for file in files:
+        with open('docs/news-sources/' + file, 'r') as f:
+            rss_links = f.readlines()
+            rss_links = [rss_link.strip() for rss_link in rss_links]
+            category = file.split('.')[0]
+
+            for rss_link in rss_links:
+                print('Scraping', rss_link)
+                rss_articles, rss_err_articles = scrape_rss(rss_link, category, args.today)
+                articles.extend(rss_articles)
+                err_articles.extend(rss_err_articles)
+
     # Export to csv
     df = pd.DataFrame(articles, columns=['link', 'title', 'published', 'category', 'content'])
     df.to_csv('docs/articles.csv', index=False)
@@ -44,3 +82,11 @@ if __name__ == '__main__':
     with open('docs/error-articles.txt', 'w') as f:
         for err_article in err_articles:
             f.write(err_article + '\n')
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Scrape articles from rss links')
+    # argument to scrape articles from today only
+    parser.add_argument('--today', action='store_true', help='Scrape articles from today only', default=False)
+
+    args = parser.parse_args()
+    main(args)
