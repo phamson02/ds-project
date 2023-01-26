@@ -1,5 +1,4 @@
 feedparser==6.0.10
-newspaper==0.1.0.7
 newspaper3k==0.2.8
 pandas==1.5.2
 urllib3==1.26.13
