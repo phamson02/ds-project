@@ -9,14 +9,14 @@ from newspaper import Config
 from dateutil.parser import parse
 import pytz
 
-from exceptions import open_vnnet_article
+from utils import open_vnanet_article
 
 
 USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:78.0) Gecko/20100101 Firefox/78.0'
 
 config = Config()
 config.browser_user_agent = USER_AGENT
-config.request_timeout = 10
+config.request_timeout = 20
 
 def article_content_scraper(article_link):
     '''Scrape article content from article_link'''
@@ -28,6 +28,8 @@ def article_content_scraper(article_link):
 def scrape_rss(rss_link, category=None, today_only=False):
     '''Scrape all articles' link from rss_link'''
     rss = feedparser.parse(rss_link)
+
+    print('Total articles:', len(rss['items']))
 
     # load all excluded sources
     with open('docs/excluded-sources.txt', 'r') as f:
@@ -51,14 +53,16 @@ def scrape_rss(rss_link, category=None, today_only=False):
 
     for article in articles:
         # Article links from vnnet.vn need special treatment
-        if 'vnnet.vn' in article[0]:
-            article[0] = open_vnnet_article(article[0])
+        if 'vnanet.vn' in article[0]:
+            article[0] = open_vnanet_article(article[0])
 
         try:
             article.append(article_content_scraper(article[0]))
-        except newspaper.article.ArticleException:
-            article.append('')
+        except newspaper.article.ArticleException as e:
+            article.append(article[1])
             err_articles.append(article[0])
+            print(article[0], e)
+
 
     return articles, err_articles
 
@@ -70,7 +74,7 @@ def main(args):
     err_articles = []
 
     for file in files:
-        with open('docs/news-sources/' + file, 'r') as f:
+        with open(args.dir + file, 'r') as f:
             rss_links = f.readlines()
             rss_links = [rss_link.strip() for rss_link in rss_links]
             category = file.split('.')[0]
@@ -83,17 +87,21 @@ def main(args):
 
     # Export to csv
     df = pd.DataFrame(articles, columns=['link', 'title', 'published', 'category', 'content'])
-    df.to_csv('docs/articles.csv', index=False)
+    df.to_csv(args.output + 'articles.csv', index=False)
 
     # Export error articles to txt
-    with open('docs/error-articles.txt', 'w') as f:
+    with open(args.output + 'error-articles.txt', 'w') as f:
         for err_article in err_articles:
             f.write(err_article + '\n')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Scrape articles from rss links')
+
+    parser.add_argument('-d', '--dir', help='Path to rss links', default='docs/news-sources/')
+    parser.add_argument('-o', '--output', help='Path to output csv file', default='docs/')
+
     # argument to scrape articles from today only
-    parser.add_argument('--today', action='store_true', help='Scrape articles from today only', default=False)
+    parser.add_argument('--today', help='Scrape articles from today only', default=False)
 
     args = parser.parse_args()
     main(args)
