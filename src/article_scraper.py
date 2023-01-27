@@ -5,15 +5,22 @@ import pandas as pd
 import newspaper
 import feedparser
 from newspaper import Article
+from newspaper import Config
 from dateutil.parser import parse
 import pytz
 
 from exceptions import open_vnnet_article
 
 
+USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:78.0) Gecko/20100101 Firefox/78.0'
+
+config = Config()
+config.browser_user_agent = USER_AGENT
+config.request_timeout = 10
+
 def article_content_scraper(article_link):
     '''Scrape article content from article_link'''
-    article = Article(article_link)
+    article = Article(article_link, config=config)
     article.download()
     article.parse()
     return article.text
