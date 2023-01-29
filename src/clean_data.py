@@ -11,6 +11,9 @@ def clean_plo_text(text):
     return text
 
 def clean_vtc_text(text):
+    if '\n' not in text:
+        return text
+
     # Remove the first line
     text = text.split('\n', 1)[1]
 
@@ -20,12 +23,18 @@ def clean_vtc_text(text):
     return text
 
 def clean_laodong_text(text):
+    if '\n' not in text:
+        return text
+
     # Remove the first line
     text = text.split('\n', 1)[1]
 
     return text
 
 def clean_vtv_text(text):
+    if '\n' not in text:
+        return text
+
     # Remove the first line
     text = text.split('\n', 1)[1]
 
