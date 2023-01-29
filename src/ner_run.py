@@ -7,7 +7,7 @@ import pandas as pd
 
 # print(res)
 
-def get_ner_data(content):
+def get_ner_data(content, ner_path, link_path):
     entities = {}
     for line in content.split("\n\n"):
         res = ner(line, deep=True)
@@ -17,6 +17,7 @@ def get_ner_data(content):
             word_ = e["word"]
             type_ = e["entity"]
             if type_.startswith("I-"):
+                # words.append((word_, type_))
                 if len(words) > 0:
                     w = words[-1]
                     words.pop()
@@ -38,4 +39,5 @@ def get_ner_data(content):
     combs = list(combinations(df_ner["entity"], 2))
     df_link = pd.DataFrame(data=combs, columns=["from", "to"])
 
-    return df_ner, df_link
+    df_ner.to_csv(ner_path, index=False)
+    df_link.to_csv(link_path, index=False)
