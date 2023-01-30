@@ -76,13 +76,19 @@ def main(args):
 
     # Clean text
     df['content'] = df['content'].apply(clean_text)
-    df.to_csv(args.input, index=False)
+
+    if not args.output:
+        args.output = args.input      
+    df.to_csv(args.output, index=False)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Clean data')
 
     parser.add_argument('-i', '--input', help='Path to input csv file', default='docs/articles.csv')
+    
+    # if no output path is specified, then the changes will be saved to the input file
+    parser.add_argument('-o', '--output', help='Path to output csv file')    
 
     args = parser.parse_args()
     main(args)

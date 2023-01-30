@@ -88,7 +88,12 @@ def main(args):
 
     # Export to csv
     df = pd.DataFrame(articles, columns=['link', 'title', 'published', 'category', 'content'])
-    df.to_csv(args.output + 'articles.csv', index=False)
+
+    # Remove duplicate articles
+    df = df.drop_duplicates(subset=['link'])
+    
+    df.index.name = 'id'
+    df.to_csv(args.output + 'articles.csv', index='id')
 
     # Export error articles to txt
     with open(args.output + 'error-articles.txt', 'w') as f:
