@@ -10,7 +10,7 @@ data_link1.rename(columns={'type':'tag'}, inplace=True)
 # change the column 'id' to 'key'
 data_link1.rename(columns={'id':'key'}, inplace=True)
 # change the column 'text' to 'label'
-data_link1.rename(columns={'text':'label'}, inplace=True)
+data_link1.rename(columns={'entity':'label'}, inplace=True)
 # Create a columns 'cluster' and set the value to '0'
 data_link1['cluster'] = '0'
 # Create a columns 'x' and set the value to math.random(int)
