@@ -3,9 +3,9 @@ import pandas as pd
 # Xử lý node.csv
 data_link1 = pd.read_csv('ner.csv',encoding ='utf-8')
 data_link1.head()
-# get the last 3 characters of the column 'type'
-data_link1['type'] = data_link1['type'].str[-3:]
-# change the column 'type' to 'tag'
+# remove the first 2 character  of the column 'type'
+data_link1['type'] = data_link1['type'].str[2:]
+# # change the column 'type' to 'tag'
 data_link1.rename(columns={'type':'tag'}, inplace=True)
 # change the column 'id' to 'key'
 data_link1.rename(columns={'id':'key'}, inplace=True)
