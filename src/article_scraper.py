@@ -57,12 +57,13 @@ def scrape_rss(rss_link, category=None, today_only=False):
             article[0] = open_vnanet_article(article[0])
 
         try:
-            article.append(article_content_scraper(article[0]))
+            # Try to scrape article content, if failed, use article title as content
+            content = article_content_scraper(article[0]) or article[1]
+            article.append(content)
         except newspaper.article.ArticleException as e:
             article.append(article[1])
             err_articles.append(article[0])
             print(article[0], e)
-
 
     return articles, err_articles
 
@@ -87,7 +88,12 @@ def main(args):
 
     # Export to csv
     df = pd.DataFrame(articles, columns=['link', 'title', 'published', 'category', 'content'])
-    df.to_csv(args.output + 'articles.csv', index=False)
+
+    # Remove duplicate articles
+    df = df.drop_duplicates(subset=['link'])
+    
+    df.index.name = 'id'
+    df.to_csv(args.output + 'articles.csv', index='id')
 
     # Export error articles to txt
     with open(args.output + 'error-articles.txt', 'w') as f:

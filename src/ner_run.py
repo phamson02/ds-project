@@ -1,43 +1,76 @@
-from underthesea import ner
+import argparse
 import pandas as pd
+from itertools import combinations
+from underthesea import ner
 
-# text = 'Vào ngày thứ Ba (giờ địa phương), Paris Hilton đã thông báo rằng cô và chồng Carter Reum đã cùng nhau chào đón đứa con đầu lòng – một cậu con trai – thông qua người mang thai hộ. Đăng một bức ảnh ngọt ngào trên Instagram - bức ảnh cô nắm tay đứa con mới sinh của mình, Paris viết "tình yêu thương không thể diễn tả bằng lời". Bức ảnh thông báo sinh con được Paris chia sẻ trên tài khoản Instagram. Ngôi sao 41 tuổi cũng xác nhận tin này với People. Cô nói: "Tôi luôn mơ ước được làm mẹ và tôi rất vui vì Carter và tôi đã tìm thấy nhau. Chúng tôi rất vui mừng được bắt đầu gia đình cùng nhau và trái tim của chúng tôi đang bùng nổ với tình yêu dành cho cậu con trai bé bỏng của chúng tôi". Tuy nhiên, người thừa kế giàu có của dòng họ Hilton không tiết lộ thời điểm đứa trẻ ra đời hay tên của con trai mình là gì. Paris Hilton lên kế hoạch sinh con vào năm 2023 - Paris Hilton tiết lộ cô đang chuẩn bị cho việc mang thai bằng cách thụ tinh trong ống nghiệm vào năm sau.'
 
-# res = ner(text, deep=True)
+def get_ner_data(content):
+    entities = []
 
-# print(res)
+    for sentence in content.split('. '):
+        res = ner(sentence, deep=True)
 
-def get_ner_data(content, ner_path, link_path):
-    entities = {}
-    for line in content.split("\n\n"):
-        res = ner(line, deep=True)
         excluded_words = set()
         words = []
         for e in res:
             word_ = e["word"]
             type_ = e["entity"]
+
+            excluded_words.add(word_)
             if type_.startswith("I-"):
-                # words.append((word_, type_))
                 if len(words) > 0:
                     w = words[-1]
                     words.pop()
                     excluded_words.add(w[0])
-                    excluded_words.add(word_)
                     word_ = w[0] + ' ' + word_
                     words.append((word_, w[1]))
             else:
                 words.append((word_, type_))
+                
         for w in words:
-            if w[0] not in entities and w[0] not in excluded_words:
-                entities[w[0]] = w[1]
+            if (w[0] not in [e[0] for e in entities]) and (w[0] not in excluded_words) and (w[0][0].isalnum()) and (len(w[0]) > 1):
+                entities.append(w)
         
-    df_ner = pd.DataFrame(data={
-        "entity": [e[0] for e in entities.items()],
-        "type": [e[1] for e in entities.items()]
-    })
-    df_ner = df_ner.sort_values("entity")
-    combs = list(combinations(df_ner["entity"], 2))
-    df_link = pd.DataFrame(data=combs, columns=["from", "to"])
+    combs = list(combinations([e[0] for e in entities], 2))
 
-    df_ner.to_csv(ner_path, index=False)
-    df_link.to_csv(link_path, index=False)
+    return entities, combs
+
+def main(arg):
+    df = pd.read_csv(arg.input)
+
+    ner_list = []
+    link_list = []
+
+    for i, row in df.iterrows():
+        print(i)
+        ner, link = get_ner_data(row["content"])
+        if not ner:
+            continue
+        ner_list += ner
+        link_list += [(fr, to, row["id"]) for fr, to in link]
+
+    df_ner = pd.DataFrame(ner_list, columns=["entity", "type"])
+    df_link = pd.DataFrame(link_list, columns=["from", "to", "article_ids"])
+
+    # drop duplicate entities
+    df_ner = df_ner.drop_duplicates(subset=["entity"])
+
+    df_link = df_link.drop_duplicates(subset=["from", "to"])
+
+    # transform df_link to have 4 columns (from, to, weight, links)
+    df_link = df_link.groupby(["from", "to"]).agg({"article_ids": lambda x: list(x)}).reset_index()
+    df_link["weight"] = df_link["article_ids"].apply(lambda x: len(x))
+
+    df_ner.index.name = "id"
+    df_ner.to_csv(arg.output + "ner.csv", index="id")
+    df_link.index.name = "id"
+    df_link.to_csv(arg.output + "link.csv", index="id")
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Extract NER data')
+
+    parser.add_argument('-i', '--input', help='Path to input csv file', default='docs/articles.csv')
+    parser.add_argument('-o', '--output', help='Path to output csv file', default='docs/ner/')
+
+    args = parser.parse_args()
+    main(args)
