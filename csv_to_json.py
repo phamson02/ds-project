@@ -11,12 +11,15 @@ data_link1.rename(columns={'type':'tag'}, inplace=True)
 data_link1.rename(columns={'id':'key'}, inplace=True)
 # change the column 'text' to 'label'
 data_link1.rename(columns={'entity':'label'}, inplace=True)
+# turn the column 'key' into columns 'label'
+data_link1['key'] = data_link1['label']
 # Create a columns 'cluster' and set the value to '0'
 data_link1['cluster'] = '0'
 # Create a columns 'x' and set the value to math.random(int)
 data_link1['x'] = data_link1['key'].apply(lambda x: random.randint(0, 100))
 data_link1['y'] = data_link1['key'].apply(lambda x: random.randint(0, 100))
 nodes = data_link1.to_dict('records')
+
 # Xử lý link.csv
 data_link = pd.read_csv('link.csv',encoding ='utf-8')
 # retieve 2 columns from and to in data_link
