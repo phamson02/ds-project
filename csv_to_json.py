@@ -20,16 +20,12 @@ df_wlink = get_link_with_weight(df_link)
 del df_link
 cliques = get_all_cliques(df_wlink)
 cluster_map = {}
-centrality_map = {}
+centrality_map = get_graph_centralities(get_graph_from_link(df_wlink))
 for i in range(len(cliques)):
-    G = get_clique_graph_from_link(df_wlink, cliques[i])
-    clique_centrality_map = get_graph_centralities(G)
     for n in cliques[i]:
         cluster_map[n] = i
-    for key, value in clique_centrality_map.items():
-        centrality_map[key] = value
 data_link1['cluster'] = data_link1['key'].apply(lambda x: cluster_map.get(x, -1))
-data_link1['size'] = data_link1['key'].apply(lambda x: centrality_map.get(x, -1))
+data_link1['size'] = data_link1['key'].apply(lambda x: centrality_map.get(x, 0.0))
 # Create a columns 'x' and set the value to math.random(int)
 data_link1['x'] = data_link1['key'].apply(lambda x: random.randint(0, 100))
 data_link1['y'] = data_link1['key'].apply(lambda x: random.randint(0, 100))
