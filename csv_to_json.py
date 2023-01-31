@@ -1,5 +1,6 @@
 import random
 import pandas as pd
+from src.find_clique import *
 # Xử lý node.csv
 data_link1 = pd.read_csv('ner.csv',encoding ='utf-8')
 data_link1.head()
@@ -13,8 +14,22 @@ data_link1.rename(columns={'id':'key'}, inplace=True)
 data_link1.rename(columns={'entity':'label'}, inplace=True)
 # turn the column 'key' into columns 'label'
 data_link1['key'] = data_link1['label']
-# Create a columns 'cluster' and set the value to '0'
-data_link1['cluster'] = '0'
+# Create a columns 'cluster' and and 'size'
+df_link = pd.read_csv("link.csv", index_col="id")
+df_wlink = get_link_with_weight(df_link)
+del df_link
+cliques = get_all_cliques(df_wlink)
+cluster_map = {}
+centrality_map = {}
+for i in range(len(cliques)):
+    G = get_clique_graph_from_link(df_wlink, cliques[i])
+    clique_centrality_map = get_graph_centralities(G)
+    for n in cliques[i]:
+        cluster_map[n] = i
+    for key, value in clique_centrality_map.items():
+        centrality_map[key] = value
+data_link1['cluster'] = data_link1['key'].apply(lambda x: cluster_map.get(x, -1))
+data_link1['size'] = data_link1['key'].apply(lambda x: centrality_map.get(x, -1))
 # Create a columns 'x' and set the value to math.random(int)
 data_link1['x'] = data_link1['key'].apply(lambda x: random.randint(0, 100))
 data_link1['y'] = data_link1['key'].apply(lambda x: random.randint(0, 100))
