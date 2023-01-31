@@ -16,11 +16,9 @@ data_link1.rename(columns={'entity':'label'}, inplace=True)
 data_link1['key'] = data_link1['label']
 # Create a columns 'cluster' and and 'size'
 df_link = pd.read_csv("link.csv", index_col="id")
-df_wlink = get_link_with_weight(df_link)
-del df_link
-cliques = get_all_cliques(df_wlink)
+cliques = get_all_cliques(df_link)
 cluster_map = {}
-centrality_map = get_graph_centralities(get_graph_from_link(df_wlink))
+centrality_map = get_graph_centralities(get_graph_from_link(df_link))
 for i in range(len(cliques)):
     for n in cliques[i]:
         cluster_map[n] = i
