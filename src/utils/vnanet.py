@@ -13,7 +13,7 @@ def open_vnanet_article(article_link):
     try:
         url = urllib.request.urlopen(article_link).geturl()
         return url
-    except urllib.error.HTTPError as e:
+    except Exception as e:
         print(f'Error opening {article_link}:\n{e}')
         return article_link
 
