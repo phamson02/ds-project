@@ -1,6 +1,6 @@
 feedparser==6.0.10
 matplotlib
-networkx==3.0
+networkx
 newspaper3k==0.2.8
 pandas
 urllib3==1.26.13
