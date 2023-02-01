@@ -63,16 +63,16 @@ def main(args):
     df = pd.read_csv(args.input)
     
     # Clean VTV.vn text
-    df.loc[df['link'].str.contains('vtv.vn'), 'content'] = df.loc[df['link'].str.contains('vtv.vn'), 'content'].apply(clean_vtv_text)
+    df.loc[df['url'].str.contains('vtv.vn'), 'content'] = df.loc[df['url'].str.contains('vtv.vn'), 'content'].apply(clean_vtv_text)
 
     # Clean PLO text
-    df.loc[df['link'].str.contains('plo.vn'), 'content'] = df.loc[df['link'].str.contains('plo.vn'), 'content'].apply(clean_plo_text)
+    df.loc[df['url'].str.contains('plo.vn'), 'content'] = df.loc[df['url'].str.contains('plo.vn'), 'content'].apply(clean_plo_text)
 
     # Clean VTC text
-    df.loc[df['link'].str.contains('vtc.vn'), 'content'] = df.loc[df['link'].str.contains('vtc.vn'), 'content'].apply(clean_vtc_text)
+    df.loc[df['url'].str.contains('vtc.vn'), 'content'] = df.loc[df['url'].str.contains('vtc.vn'), 'content'].apply(clean_vtc_text)
 
     # Clean laodong text
-    df.loc[df['link'].str.contains('laodong.vn'), 'content'] = df.loc[df['link'].str.contains('laodong.vn'), 'content'].apply(clean_laodong_text)
+    df.loc[df['url'].str.contains('laodong.vn'), 'content'] = df.loc[df['url'].str.contains('laodong.vn'), 'content'].apply(clean_laodong_text)
 
     # Clean text
     df['content'] = df['content'].apply(clean_text)

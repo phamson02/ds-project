@@ -87,10 +87,10 @@ def main(args):
                 err_articles.extend(rss_err_articles)
 
     # Export to csv
-    df = pd.DataFrame(articles, columns=['link', 'title', 'published', 'category', 'content'])
+    df = pd.DataFrame(articles, columns=['url', 'title', 'pubDate', 'category', 'content'])
 
     # Remove duplicate articles
-    df = df.drop_duplicates(subset=['link'])
+    df = df.drop_duplicates(subset=['url'])
     
     df.index.name = 'id'
     df.to_csv(args.output + 'articles.csv', index='id')

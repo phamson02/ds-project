@@ -13,6 +13,8 @@ def get_ner_data(content):
         excluded_words = set()
         words = []
         for e in res:
+            if e['entity'] not in ['PER', 'LOC', 'ORG']:
+                continue
             word_ = e["word"]
             type_ = e["entity"]
 
@@ -53,9 +55,14 @@ def main(arg):
     df_link = pd.DataFrame(link_list, columns=["from", "to", "article_ids"])
 
     # drop duplicate entities
-    df_ner = df_ner.drop_duplicates(subset=["entity"])
+    df_ner.drop_duplicates(subset=["entity"], inplace=True)
+    df_ner['type'] = df_ner['type'].str[-3:]
 
-    df_link = df_link.drop_duplicates(subset=["from", "to"])
+    # Store the combination of 'from' and 'to' in the alphabetical order to drop duplicate links
+    df_link["from_to"] = df_link.apply(lambda x: sorted([x["from"], x["to"]]), axis=1)
+    df_link["from_to"] = df_link["from_to"].apply(lambda x: " ".join(x))
+    df_link.drop_duplicates(subset=["from_to"], inplace=True)
+    df_link.drop("from_to", axis=1, inplace=True)
 
     # transform df_link to have 4 columns (from, to, weight, links)
     df_link = df_link.groupby(["from", "to"]).agg({"article_ids": lambda x: list(x)}).reset_index()

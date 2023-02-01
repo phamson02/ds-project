@@ -10,7 +10,12 @@ def open_vnanet_article(article_link):
     # -> https://vnanet.vn/Frontend/TrackingView.aspx?IID=XXXXXX
     article_link = article_link.replace('https://vnanet.vnhttps://vnanet.vn', 'https://vnanet.vn')
 
-    return urllib.request.urlopen(article_link).geturl()
+    try:
+        url = urllib.request.urlopen(article_link).geturl()
+        return url
+    except urllib.error.HTTPError as e:
+        print(f'Error opening {article_link}:\n{e}')
+        return article_link
 
 if __name__ == '__main__':
     article_link = 'https://vnanet.vnhttps://vnanet.vn/Frontend/TrackingView.aspx?IID=6558139'
