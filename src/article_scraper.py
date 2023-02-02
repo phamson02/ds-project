@@ -91,6 +91,9 @@ def main(args):
 
     # Remove duplicate articles
     df = df.drop_duplicates(subset=['url'])
+
+    # For articles with no content, use title as content
+    df['content'] = df['content'].fillna(df['title'])
     
     df.index.name = 'id'
     df.to_csv(args.output + 'articles.csv', index='id')
