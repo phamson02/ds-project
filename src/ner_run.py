@@ -1,6 +1,7 @@
 import argparse
 import pandas as pd
 from itertools import combinations
+from tqdm import tqdm
 from underthesea import ner
 
 
@@ -10,13 +11,14 @@ def get_ner_data(content):
     for sentence in content.split('. '):
         try:
             res = ner(sentence, deep=True)
-        except:
+        except Exception as e:
+            print(e)
             continue
 
         excluded_words = set()
         words = []
         for e in res:
-            if e['entity'] not in ['PER', 'LOC', 'ORG']:
+            if e['entity'][-3:] not in ['PER', 'LOC', 'ORG']:
                 continue
             word_ = e["word"]
             type_ = e["entity"]
@@ -46,13 +48,11 @@ def main(arg):
     ner_list = []
     link_list = []
 
-    for i, row in df.iterrows():
-        print(i)
+    for _, row in tqdm(df.iterrows(), total=df.shape[0]):
         ner, link = get_ner_data(row["content"])
-        if not ner:
-            continue
         ner_list += ner
         link_list += [(fr, to, row["id"]) for fr, to in link]
+
 
     df_ner = pd.DataFrame(ner_list, columns=["entity", "type"])
     df_link = pd.DataFrame(link_list, columns=["from", "to", "article_ids"])
