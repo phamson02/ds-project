@@ -8,7 +8,10 @@ def get_ner_data(content):
     entities = []
 
     for sentence in content.split('. '):
-        res = ner(sentence, deep=True)
+        try:
+            res = ner(sentence, deep=True)
+        except:
+            continue
 
         excluded_words = set()
         words = []

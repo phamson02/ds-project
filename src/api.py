@@ -1,12 +1,11 @@
-# Send POST request to https://mongodb-f71r.onrender.com
 import argparse
 import pandas as pd
 import requests
 
-head = {'accept': 'application/json', 'Content-Type': 'application/json', 'Content-Length': '2000'}
+head = {'accept': 'application/json', 'Content-Type': 'application/json', 'Content-Length': '2000000'}
 
 def main(args):
-    url = 'https://mongodb-f71r.onrender.com/api/'
+    url = 'https://lionfish-app-pnbyg.ondigitalocean.app/api/'
     
     if args.type == 'article':
         url += 'article'
@@ -54,7 +53,7 @@ def main(args):
     elif args.type == 'edge':
         url += 'edge'
 
-        for chunk in pd.read_csv(args.input, chunksize=20):
+        for chunk in pd.read_csv(args.input, chunksize=1000):
             edges = chunk
             edges.drop('id', axis=1, inplace=True)
             edges.rename(columns={'from': 'source', 'to': 'target', 'article_ids': 'articles', 'weight': 'size'}, inplace=True)
