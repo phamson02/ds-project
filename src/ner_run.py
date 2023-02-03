@@ -64,7 +64,7 @@ def main(arg):
     # Store the combination of 'from' and 'to' in the alphabetical order to drop duplicate links
     df_link["from_to"] = df_link.apply(lambda x: sorted([x["from"], x["to"]]), axis=1)
     df_link["from_to"] = df_link["from_to"].apply(lambda x: " ".join(x))
-    df_link.drop_duplicates(subset=["from_to"], inplace=True)
+    df_link.drop_duplicates(subset=["from_to", "article_ids"], inplace=True)
     df_link.drop("from_to", axis=1, inplace=True)
 
     # transform df_link to have 4 columns (from, to, weight, links)
