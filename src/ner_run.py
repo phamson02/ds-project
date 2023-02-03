@@ -18,7 +18,7 @@ def get_ner_data(content):
         excluded_words = set()
         words = []
         for e in res:
-            if e['entity'][-3:] not in ['PER', 'LOC', 'ORG']:
+            if e['entity'][-3:] not in ['PER', 'ORG']:
                 continue
             word_ = e["word"]
             type_ = e["entity"]
