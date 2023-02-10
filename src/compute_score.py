@@ -6,8 +6,8 @@ import pandas as pd
 def main(args):
     G = nx.Graph()
 
-    df_link = pd.read_csv(args.directory + "link.csv", index_col="id")
-    df_ner = pd.read_csv(args.directory + "ner.csv", index_col="id")
+    df_link = pd.read_csv(args.directory + "link.csv")
+    df_ner = pd.read_csv(args.directory + "ner.csv")
 
     # Add edges and weights
     for index, row in df_link.iterrows():
@@ -25,7 +25,7 @@ def main(args):
 
     df_ner['score'] = df_ner['id'].apply(lambda x: centrality_map.get(x, 0.0))
 
-    df_ner.to_csv(args.directory + "ner_score.csv", index=False)
+    df_ner.to_csv(args.directory + "ner.csv", index=False)
 
 
 if __name__ == "__main__":
