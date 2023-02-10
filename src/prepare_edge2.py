@@ -20,10 +20,10 @@ if __name__ == '__main__':
     argparser = argparse.ArgumentParser()
 
     # Dir link to entity data
-    argparser.add_argument('--input', type=str, default='docs/articles.csv', help='Input file')
+    argparser.add_argument('--input', type=str, default='data/articles.csv', help='Input file')
 
     # Dir link to edge data
-    argparser.add_argument('--output', type=str, default='docs/ner/link.csv', help='Output file')
+    argparser.add_argument('--output', type=str, default='data/link.csv', help='Output file')
 
     args = argparser.parse_args()
 

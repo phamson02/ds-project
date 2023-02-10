@@ -107,7 +107,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Scrape articles from rss links')
 
     parser.add_argument('-d', '--dir', help='Path to rss links', default='docs/news-sources/')
-    parser.add_argument('-o', '--output', help='Path to output csv file', default='docs/')
+    parser.add_argument('-o', '--output', help='Path to output csv file', default='data/')
 
     # argument to scrape articles from today only
     parser.add_argument('--today', help='Scrape articles from today only', default=False)

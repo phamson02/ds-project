@@ -49,11 +49,11 @@ def main(args):
             nodes_dict = nodes.to_dict('records')
 
             r = requests.post(url, json=nodes_dict)
+
+            print(r.status_code)
             if r.status_code == 200:
                 id_arr += r.json()
-                print(len(id_arr))
             else:
-                print(r.status_code)
                 print(r.text)
 
                 cnt_tries = 0
@@ -78,17 +78,17 @@ def main(args):
             edges.rename(columns={'from': 'source', 'to': 'target', 'article_ids': 'articles', 'weight': 'size'}, inplace=True)
             edges_dict = edges.to_dict('records')
             for edge in edges_dict:
-                edge['articles'] = edge['articles'][1:-1].split(',')
+                edge['articles'] = eval(edge['articles'])
                 edge['size'] = int(edge['size'])
-            
+
             r = requests.post(url, json=edges_dict)
 
+            print(r.status_code)
             if r.status_code != 200:
-                print(r.status_code)
-                print(r.text)
 
                 cnt_tries = 0
                 while r.status_code != 200 and cnt_tries < 3:
+                    
                     time.sleep(5)
                     r = requests.post(url, json=edges_dict)
                     if r.status_code == 200:

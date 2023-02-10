@@ -85,7 +85,7 @@ def main(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Clean data')
 
-    parser.add_argument('-i', '--input', help='Path to input csv file', default='docs/articles.csv')
+    parser.add_argument('-i', '--input', help='Path to input csv file', default='data/articles.csv')
     
     # if no output path is specified, then the changes will be saved to the input file
     parser.add_argument('-o', '--output', help='Path to output csv file')    
