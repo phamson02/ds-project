@@ -96,6 +96,11 @@ def main(args):
     df['content'] = df['content'].fillna(df['title'])
     
     df.index.name = 'id'
+
+    # Check if output dir exists
+    if not os.path.exists(args.output):
+        os.makedirs(args.output)
+
     df.to_csv(args.output + 'articles.csv', index='id')
 
     # Export error articles to txt
