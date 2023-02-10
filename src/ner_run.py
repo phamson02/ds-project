@@ -4,8 +4,6 @@ from itertools import combinations
 from tqdm import tqdm
 from underthesea import ner
 
-WEIGHT_THRESHOLD = 2
-
 
 def get_ner_data(content):
     entities = []
@@ -44,13 +42,6 @@ def get_ner_data(content):
 
     return entities, combs
 
-def clean_ner_data(df_ner, df_link, weight_threshold=WEIGHT_THRESHOLD):
-    link_dropped = df_link[df_link['weight'] > weight_threshold]
-
-    entities = set(link_dropped['from'].values.tolist() + link_dropped['to'].values.tolist())
-    node_dropped = df_ner[df_ner['entity'].isin(entities)]
-    return node_dropped, link_dropped
-
 def main(arg):
     df = pd.read_csv(arg.input)
 
@@ -79,8 +70,6 @@ def main(arg):
     # transform df_link to have 4 columns (from, to, weight, links)
     df_link = df_link.groupby(["from", "to"]).agg({"article_ids": lambda x: list(x)}).reset_index()
     df_link["weight"] = df_link["article_ids"].apply(lambda x: len(x))
-
-    df_ner, df_link = clean_ner_data(df_ner, df_link)
 
     df_ner.index.name = "id"
     df_ner.to_csv(arg.output + "ner.csv", index="id")
