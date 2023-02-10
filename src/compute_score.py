@@ -1,7 +1,6 @@
 import argparse
 import networkx as nx
 import pandas as pd
-import tqdm
 
 
 def main(args):
@@ -17,7 +16,7 @@ def main(args):
     nodes = []
     eigenvector_cents = []
     ec_dict = nx.eigenvector_centrality(G, max_iter=1000, weight='weight')
-    for node in tqdm(G.nodes()):
+    for node in G.nodes():
         nodes.append(node)
         eigenvector_cents.append(ec_dict[node])
     centrality_map = {}
