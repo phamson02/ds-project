@@ -1,22 +1,17 @@
-import pandas as pd
-import json
 import random
+import pandas as pd
+from src.find_clique import *
 
-# Xử lý node.csv
-data_link1 = pd.read_csv('ner.csv',encoding ='utf-8')
-data_link1.head()
-# get the last 3 characters of the column 'type'
-data_link1['type'] = data_link1['type'].str[-3:]
-# change the column 'type' to 'tag'
-data_link1.rename(columns={'type':'tag'}, inplace=True)
-# change the column 'id' to 'key'
-data_link1.rename(columns={'id':'key'}, inplace=True)
-# change the column 'text' to 'label'
-data_link1.rename(columns={'entity':'label'}, inplace=True)
-# turn the column 'key' into columns 'label'
-data_link1['key'] = data_link1['label']
-# Create a columns 'cluster' and set the value to '0'
-data_link1['cluster'] = '0'
+data_link1 = pd.read_csv('data/ner_new.csv',encoding ='utf-8')
+df_link = pd.read_csv("data/link_new.csv", index_col="id")
+cliques = get_all_cliques(df_link)
+cluster_map = {}
+centrality_map = get_graph_centralities(get_graph_from_link(df_link))
+for i in range(len(cliques)):
+    for n in cliques[i]:
+        cluster_map[n] = i
+data_link1['cluster'] = data_link1['key'].apply(lambda x: cluster_map.get(x, -1))
+data_link1['size'] = data_link1['key'].apply(lambda x: centrality_map.get(x, 0.0))
 # Create a columns 'x' and set the value to math.random(int)
 data_link1['x'] = data_link1['key'].apply(lambda x: random.randint(0, 100))
 data_link1['y'] = data_link1['key'].apply(lambda x: random.randint(0, 100))
@@ -29,7 +24,8 @@ data_link = data_link[['from','to']]
 # get the list of nodes
 edges =  data_link.values.tolist()
 
-
+import pandas as pd
+import json 
 # write json have the following structure
 def write_json(data,data1,filename):
     with open(filename, 'w',encoding='utf-8') as f:
