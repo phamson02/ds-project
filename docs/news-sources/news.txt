@@ -6,7 +6,7 @@ http://vtv.vn/trong-nuoc/phap-luat.rss
 https://laodong.vn/rss/thoi-su.rss
 https://laodong.vn/rss/xa-hoi.rss
 https://tuoitre.vn/rss/thoi-su.rss
-https://thanhnien.vn/rss/thoi-su-4.rss
+https://thanhnien.vn/rss/thoi-su.rss
 https://nld.com.vn/thoi-su.rss
 https://soha.vn/thoi-su-xa-hoi.rss
 https://www.nguoiduatin.vn/rss/chinh-tri-xa-hoi.rss

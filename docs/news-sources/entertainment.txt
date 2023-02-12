@@ -6,8 +6,8 @@ http://vtv.vn/van-hoa-giai-tri/sao.rss
 https://laodong.vn/rss/van-hoa-giai-tri.rss
 https://tuoitre.vn/rss/giai-tri.rss
 https://tuoitre.vn/rss/van-hoa.rss
-https://thanhnien.vn/rss/giai-tri-285.rss
-https://thanhnien.vn/rss/van-hoa-93.rss
+https://thanhnien.vn/rss/giai-tri.rss
+https://thanhnien.vn/rss/van-hoa.rss
 https://nld.com.vn/giai-tri.rss
 https://soha.vn/giai-tri.rss
 https://www.nguoiduatin.vn/rss/giai-tri.rss

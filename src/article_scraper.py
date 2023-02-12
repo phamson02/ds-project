@@ -23,7 +23,7 @@ def article_content_scraper(article_link):
     article = Article(article_link, config=config)
     article.download()
     article.parse()
-    return article.text
+    return article.text 
 
 def scrape_rss(rss_link, category=None, today_only=False):
     '''Scrape all articles' link from rss_link'''
@@ -58,7 +58,9 @@ def scrape_rss(rss_link, category=None, today_only=False):
 
         try:
             # Try to scrape article content, if failed, use article title as content
-            content = article_content_scraper(article[0]) or article[1]
+            content = article_content_scraper(article[0])
+            if len(content) < len(article[1]):
+                content = article[1]
             article.append(content)
         except newspaper.article.ArticleException as e:
             article.append(article[1])
