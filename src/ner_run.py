@@ -37,6 +37,8 @@ def get_ner_data(content):
         for w in words:
             if (w[0] not in [e[0] for e in entities]) and (w[0] not in excluded_words) and (w[0][0].isalnum()) and (len(w[0]) > 1):
                 entities.append(w)
+
+    # TODO: implement further filtering of entities
         
     combs = list(combinations([e[0] for e in entities], 2))
 
@@ -49,6 +51,9 @@ def main(arg):
     link_list = []
 
     for _, row in tqdm(df.iterrows(), total=df.shape[0]):
+        if isinstance(row["content"], float):
+            print(f'Found NaN at row {row["id"]}, {row["url"]}')
+            continue
         ner, link = get_ner_data(row["content"])
         ner_list += ner
         link_list += [(fr, to, row["id"]) for fr, to in link]
