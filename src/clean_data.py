@@ -57,6 +57,10 @@ def clean_text(text):
     # Clean multiple spaces
     text = ' '.join(text.split())
 
+    # Remove any words that contains "/TTXVN"
+    words = text.split(' ')
+    words = [word for word in words if '/TTXVN' not in word]
+
     return text
 
 def main(args):
@@ -76,6 +80,9 @@ def main(args):
 
     # Clean text
     df['content'] = df['content'].apply(clean_text)
+
+    # Fill NaN values with title
+    df['content'] = df['content'].fillna(df['title'])
 
     if not args.output:
         args.output = args.input      
