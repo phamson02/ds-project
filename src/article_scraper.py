@@ -27,7 +27,11 @@ def article_content_scraper(article_link):
 
 def scrape_rss(rss_link, category=None, today_only=False):
     '''Scrape all articles' link from rss_link'''
-    rss = feedparser.parse(rss_link)
+    try:
+        rss = feedparser.parse(rss_link)
+    except Exception as e:
+        print(rss_link, e)
+        return [], []
 
     print('Total articles:', len(rss['items']))
 
@@ -85,8 +89,9 @@ def main(args):
             for rss_link in rss_links:
                 print('Scraping', rss_link)
                 rss_articles, rss_err_articles = scrape_rss(rss_link, category, args.today)
-                articles.extend(rss_articles)
-                err_articles.extend(rss_err_articles)
+                if rss_articles:
+                    articles.extend(rss_articles)
+                    err_articles.extend(rss_err_articles)
 
     # Export to csv
     df = pd.DataFrame(articles, columns=['url', 'title', 'pubDate', 'category', 'content'])
