@@ -6,6 +6,10 @@ import requests
 
 def main(args):
     url = 'https://lionfish-app-pnbyg.ondigitalocean.app/api/'
+
+    # if args.input file is empty, return
+    if pd.read_csv(args.input).empty:
+        return
     
     if args.type == 'article':
         url += 'article'

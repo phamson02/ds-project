@@ -9,7 +9,7 @@ from newspaper import Config
 from dateutil.parser import parse
 import pytz
 
-from utils import open_vnanet_article
+from utils import *
 
 
 USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:78.0) Gecko/20100101 Firefox/78.0'
@@ -59,6 +59,9 @@ def scrape_rss(rss_link, category=None, today_only=False):
         # Article links from vnnet.vn need special treatment
         if 'vnanet.vn' in article[0]:
             article[0] = open_vnanet_article(article[0])
+
+        if 'thanhnien.vn' in article[0]:
+            article[1] = fix_thanhnien_title(article[1])
 
         try:
             # Try to scrape article content, if failed, use article title as content
