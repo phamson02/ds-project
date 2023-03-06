@@ -3,17 +3,14 @@ import html
 
 def fix_thanhnien_title(title):
     '''Fix thanhnien.vn title'''
-    if "<![CDATA[" not in title:
-        return title
+    if "<![CDATA[" in title:
+        title = title.replace("<![CDATA[ ", "").replace("]]>", "")
 
     # Decode HTML entities
     decoded_str = html.unescape(title)
 
-    # Remove CDATA tags
-    utf8_str = decoded_str.replace("<![CDATA[", "").replace("]]>", "")
-
-    return utf8_str
+    return decoded_str
 
 if __name__ == "__main__":
-    input_str = "<![CDATA[ Hộ chiếu Logistics - &#039;ch&igrave;a kh&oacute;a&#039; tạo sức bật cho doanh nghiệp xuất khẩu? ]]>"
+    input_str = "Chiến sự ng&agrave;y 375: Ukraine khai hỏa HIMARS, Bộ trưởng Quốc ph&ograve;ng Nga c&oacute; động th&aacute;i mới ]]>"
     print(fix_thanhnien_title(input_str))
