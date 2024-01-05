@@ -3,13 +3,8 @@ import pandas as pd
 from itertools import combinations
 from tqdm import tqdm
 from underthesea import ner
-import logging
 import os
 import uuid
-
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
 
 
 def get_ner_data(content):
@@ -23,7 +18,7 @@ def get_ner_data(content):
         try:
             res = ner(sentence, deep=True)
         except Exception as e:
-            logging.error(f"Error in NER processing: {e}")
+            print(f"Error in NER processing: {e}")
             continue
 
         processed_entities = process_entities(res, excluded_words)
@@ -78,7 +73,7 @@ def extract_entities_and_links(row):
     Extract entities and links from a single row of the DataFrame.
     """
     if not isinstance(row["content"], str):
-        logging.warning(f'Invalid content at row {row["id"]}, {row["url"]}')
+        print(f'Invalid content at row {row["id"]}, {row["url"]}')
         return [], []
 
     entities = get_ner_data(row["content"])

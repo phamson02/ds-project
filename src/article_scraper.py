@@ -7,15 +7,9 @@ import feedparser
 from newspaper import Article, Config
 from dateutil.parser import parse
 import pytz
-import logging
 import uuid
 
 from utils import open_vnanet_article, fix_thanhnien_title
-
-# Setting up logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s", force=True
-)
 
 USER_AGENT = (
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:78.0) Gecko/20100101 Firefox/78.0"
@@ -34,7 +28,7 @@ def article_content_scraper(article_link):
         article.parse()
         return article.text
     except newspaper.article.ArticleException as e:
-        logging.error(f"Error scraping {article_link}: {e}")
+        print(f"Error scraping {article_link}: {e}")
         return None
 
 
@@ -83,7 +77,7 @@ def scrape_rss(rss_link, category=None, start_date=None, end_date=None):
     try:
         rss = feedparser.parse(rss_link)
     except Exception as e:
-        logging.error(f"Error parsing RSS feed {rss_link}: {e}")
+        print(f"Error parsing RSS feed {rss_link}: {e}")
         return [], []
 
     with open("docs/excluded-sources.txt", "r") as f:
@@ -92,7 +86,7 @@ def scrape_rss(rss_link, category=None, start_date=None, end_date=None):
     if start_date and end_date:
         rss["items"] = filter_articles_in_date_range(rss["items"], start_date, end_date)
 
-    logging.info(f"Collected articles: {len(rss['items'])}")
+    print(f"Collected articles: {len(rss['items'])}")
 
     articles, err_articles = [], []
     for item in rss["items"]:
@@ -116,15 +110,15 @@ def main(args):
 
             for rss_link in rss_links:
                 if args.date:
-                    logging.info(f"Scraping {rss_link} on {args.date}")
+                    print(f"Scraping {rss_link} on {args.date}")
                     args.start_date = args.date
                     args.end_date = args.date
                 elif args.start_date and args.end_date:
-                    logging.info(
+                    print(
                         f"Scraping {rss_link} from {args.start_date} to {args.end_date}"
                     )
                 else:
-                    logging.info(f"Scraping all links {rss_link}")
+                    print(f"Scraping all links {rss_link}")
                 rss_articles, rss_err_articles = scrape_rss(
                     rss_link, category, args.start_date, args.end_date
                 )
