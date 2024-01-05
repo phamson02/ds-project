@@ -11,61 +11,93 @@ def get_ner_data(content):
     """
     Extract Named Entity Recognition (NER) data from the content.
     """
-    entities = []
-    excluded_words = set()
+    entities = set()
 
     for sentence in content.split(". "):
         try:
-            res = ner(sentence, deep=True)
+            ner_results = ner(sentence, deep=True)
+            entities.update(process_entities(ner_results))
         except Exception as e:
             print(f"Error in NER processing: {e}")
-            continue
 
-        processed_entities = process_entities(res, excluded_words)
-        entities.extend(processed_entities)
-
-    return list(set(entities))
+    return list(entities)
 
 
-def process_entities(res, excluded_words):
+def process_entities(ner_results, extracted_types=["PER", "ORG"]):
     """
-    Process NER results to filter and combine entities.
+    Process NER results to filter, combine entities, and extract unique entities.
     """
-    words = []
-    for e in res:
-        if e["entity"][-3:] not in ["PER", "ORG"]:
-            continue
-        process_entity(e, words, excluded_words)
+    combined_entities = []
+    current_entity = []
+    current_type = None
 
-    return [w for w in words if is_valid_entity(w, excluded_words)]
+    excluded_words = set()
+
+    for token in ner_results:
+        word, entity_type = token["word"], token["entity"]
+
+        if entity_type[-3:] in extracted_types:
+            if entity_type.startswith("B-") or current_type != entity_type[-3:]:
+                finalize_current_entity(
+                    combined_entities, current_entity, current_type, excluded_words
+                )
+                current_entity = [word]
+                current_type = entity_type[-3:]
+            elif entity_type.startswith("I-") and current_type == entity_type[-3:]:
+                current_entity.append(word)
+        else:
+            # Finalize the current entity if the current token is not part of an entity
+            finalize_current_entity(
+                combined_entities, current_entity, current_type, excluded_words
+            )
+
+    # Finalize the last entity if present
+    finalize_current_entity(
+        combined_entities, current_entity, current_type, excluded_words
+    )
+
+    return [
+        (entity, entity_type)
+        for entity, entity_type in combined_entities
+        if (entity not in excluded_words) and is_valid_entity(entity)
+    ]
 
 
-def process_entity(e, words, excluded_words):
+def finalize_current_entity(
+    combined_entities, current_entity, current_type, excluded_words
+):
     """
-    Process individual entity from NER results.
+    Finalize the current entity and add it to the list of combined entities.
     """
-    word_ = e["word"]
-    type_ = e["entity"]
+    if current_entity:
+        entity = " ".join(current_entity)
+        entity_type = current_type[-3:] if current_type else None
+        combined_entities.append((entity, entity_type))
 
-    excluded_words.add(word_)
-    if type_.startswith("I-") and words:
-        w = words.pop()
-        excluded_words.add(w[0])
-        word_ = w[0] + " " + word_
-        words.append((word_, w[1]))
-    else:
-        words.append((word_, type_))
+        # Add subwords to the list of excluded words (e.g. "Nguyễn Văn A" -> "Nguyễn", "Văn", "A", "Nguyễn Văn", "Văn A")
+        subwords = get_subwords(entity)
+        excluded_words.update(subwords)
+
+        # Clear current entity and type for the next one
+        current_entity.clear()
+        current_type = None
 
 
-def is_valid_entity(entity, excluded_words):
+def get_subwords(name):
+    words = name.split()
+    subwords = []
+    for i in range(len(words)):
+        subwords.append(words[i])
+        if i < len(words) - 1:
+            subwords.append(words[i] + " " + words[i + 1])
+    return subwords
+
+
+def is_valid_entity(entity):
     """
     Check if an entity is valid based on certain criteria.
     """
-    return (
-        (entity[0] not in excluded_words)
-        and (entity[0][0].isalnum())
-        and (len(entity[0]) > 1)
-    )
+    return (entity[0].isalnum()) and (len(entity) > 1)
 
 
 def extract_entities_and_links(row):

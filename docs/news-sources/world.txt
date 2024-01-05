@@ -6,7 +6,6 @@ https://laodong.vn/rss/the-gioi.rss
 https://tuoitre.vn/rss/the-gioi.rss
 https://thanhnien.vn/rss/the-gioi.rss
 https://nld.com.vn/rss/quoc-te.rss
-https://soha.vn/rss/quoc-te.rss
 https://kienthuc.net.vn/rss/the-gioi-25.rss
 https://kinhtedothi.vn/quoc-te.rss
 https://vtc.vn/rss/the-gioi.rss

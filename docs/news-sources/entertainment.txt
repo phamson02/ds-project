@@ -9,7 +9,6 @@ https://tuoitre.vn/rss/van-hoa.rss
 https://thanhnien.vn/rss/giai-tri.rss
 https://thanhnien.vn/rss/van-hoa.rss
 https://nld.com.vn/rss/giai-tri.rss
-https://soha.vn/rss/giai-tri.rss
 https://www.nguoiduatin.vn/rss/giai-tri.rss
 https://kienthuc.net.vn/rss/giai-tri-11.rss
 https://vtc.vn/rss/van-hoa-giai-tri.rss
