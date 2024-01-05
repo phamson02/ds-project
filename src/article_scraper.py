@@ -38,16 +38,19 @@ def article_content_scraper(article_link):
         return None
 
 
-def filter_articles_by_date(items, target_date, timezone_str="Asia/Ho_Chi_Minh"):
-    """Filter articles published on a specific date"""
-    target_date = datetime.datetime.strptime(target_date, "%Y-%m-%d")
-    target_date = target_date.astimezone(pytz.timezone(timezone_str)).strftime(
-        "%Y-%m-%d"
-    )
+def filter_articles_in_date_range(
+    items, start_date, end_date, timezone_str="Asia/Ho_Chi_Minh"
+):
+    """Filter articles published within a specific date range"""
+    start_date = datetime.datetime.strptime(start_date, "%Y-%m-%d")
+    end_date = datetime.datetime.strptime(end_date, "%Y-%m-%d")
+    start_date = start_date.astimezone(pytz.timezone(timezone_str)).strftime("%Y-%m-%d")
+    end_date = end_date.astimezone(pytz.timezone(timezone_str)).strftime("%Y-%m-%d")
+
     return [
         item
         for item in items
-        if parse(item["published"]).strftime("%Y-%m-%d") == target_date
+        if start_date <= parse(item["published"]).strftime("%Y-%m-%d") <= end_date
     ]
 
 
@@ -75,7 +78,7 @@ def process_article_item(item, category, excluded_sources):
     return article
 
 
-def scrape_rss(rss_link, category=None, filter_date=None):
+def scrape_rss(rss_link, category=None, start_date=None, end_date=None):
     """Scrape all articles' links from rss_link"""
     try:
         rss = feedparser.parse(rss_link)
@@ -86,8 +89,8 @@ def scrape_rss(rss_link, category=None, filter_date=None):
     with open("docs/excluded-sources.txt", "r") as f:
         excluded_sources = f.read().splitlines()
 
-    if filter_date:
-        rss["items"] = filter_articles_by_date(rss["items"], filter_date)
+    if start_date and end_date:
+        rss["items"] = filter_articles_in_date_range(rss["items"], start_date, end_date)
 
     logging.info(f"Collected articles: {len(rss['items'])}")
 
@@ -112,9 +115,18 @@ def main(args):
             category = os.path.splitext(file)[0]
 
             for rss_link in rss_links:
-                logging.info(f"Scraping {rss_link}")
+                if args.date:
+                    logging.info(f"Scraping {rss_link} on {args.date}")
+                    args.start_date = args.date
+                    args.end_date = args.date
+                elif args.start_date and args.end_date:
+                    logging.info(
+                        f"Scraping {rss_link} from {args.start_date} to {args.end_date}"
+                    )
+                else:
+                    logging.info(f"Scraping all links {rss_link}")
                 rss_articles, rss_err_articles = scrape_rss(
-                    rss_link, category, args.date
+                    rss_link, category, args.start_date, args.end_date
                 )
                 articles.extend(rss_articles)
                 err_articles.extend(rss_err_articles)
@@ -149,5 +161,22 @@ if __name__ == "__main__":
     parser.add_argument(
         "--date", help="Scrape articles from a specific date (YYYY-MM-DD)"
     )
+    parser.add_argument(
+        "--start-date", help="Start date for article scraping (YYYY-MM-DD)"
+    )
+    parser.add_argument("--end-date", help="End date for article scraping (YYYY-MM-DD)")
     args = parser.parse_args()
+
+    # Start date and end date must be specified together
+    if not (args.start_date and args.end_date) and (args.start_date or args.end_date):
+        raise ValueError(
+            "Invalid argument: Both start_date and end_date must be specified"
+        )
+
+    # If date is specified, and start_date or end_date is also specified, raise error invalid argument
+    if args.date and (args.start_date or args.end_date):
+        raise ValueError(
+            "Invalid argument: Either filter by date or date range, not both"
+        )
+
     main(args)
