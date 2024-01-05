@@ -141,6 +141,8 @@ def main(args):
 
     if args.date:
         file_name = f"articles_{args.date}.csv"
+    elif args.start_date and args.end_date:
+        file_name = f"articles_{args.start_date}--{args.end_date}.csv"
     else:
         file_name = "articles.csv"
 
