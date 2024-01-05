@@ -132,8 +132,6 @@ def clean_text(text):
     # Strip leading and trailing spaces
     text = text.strip()
 
-    print(text)
-
     return text
 
 
