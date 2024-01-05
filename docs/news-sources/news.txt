@@ -7,8 +7,8 @@ https://laodong.vn/rss/thoi-su.rss
 https://laodong.vn/rss/xa-hoi.rss
 https://tuoitre.vn/rss/thoi-su.rss
 https://thanhnien.vn/rss/thoi-su.rss
-https://nld.com.vn/thoi-su.rss
-https://soha.vn/thoi-su-xa-hoi.rss
+https://nld.com.vn/rss/thoi-su.rss
+https://soha.vn/rss/thoi-su-xa-hoi.rss
 https://www.nguoiduatin.vn/rss/chinh-tri-xa-hoi.rss
 https://www.nguoiduatin.vn/rss/phap-luat.rss
 https://kienthuc.net.vn/rss/xa-hoi-24.rss

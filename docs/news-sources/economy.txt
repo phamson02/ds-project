@@ -6,9 +6,9 @@ http://vtv.vn/kinh-te/thi-truong.rss
 https://laodong.vn/rss/kinh-doanh.rss
 https://tuoitre.vn/rss/kinh-doanh.rss
 https://thanhnien.vn/rss/kinh-te.rss
-https://nld.com.vn/kinh-te.rss
-https://nld.com.vn/thi-truong.rss
-https://soha.vn/kinh-doanh.rss
+https://nld.com.vn/rss/kinh-te.rss
+https://nld.com.vn/rss/thi-truong.rss
+https://soha.vn/rss/kinh-doanh.rss
 https://www.nguoiduatin.vn/rss/kinh-doanh.rss
 https://kienthuc.net.vn/rss/kinh-doanh-9.rss
 https://kinhtedothi.vn/kinh-te.rss
