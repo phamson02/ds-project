@@ -4,128 +4,150 @@ import os
 import pandas as pd
 import newspaper
 import feedparser
-from newspaper import Article
-from newspaper import Config
+from newspaper import Article, Config
 from dateutil.parser import parse
 import pytz
+import logging
+import uuid
 
-from utils import *
+from utils import open_vnanet_article, fix_thanhnien_title
 
+# Setting up logging
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 
-USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:78.0) Gecko/20100101 Firefox/78.0'
+USER_AGENT = (
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:78.0) Gecko/20100101 Firefox/78.0"
+)
 
 config = Config()
 config.browser_user_agent = USER_AGENT
 config.request_timeout = 20
 
-def article_content_scraper(article_link):
-    '''Scrape article content from article_link'''
-    article = Article(article_link, config=config)
-    article.download()
-    article.parse()
-    return article.text 
 
-def scrape_rss(rss_link, category=None, today_only=False):
-    '''Scrape all articles' link from rss_link'''
+def article_content_scraper(article_link):
+    """Scrape article content from article_link"""
+    try:
+        article = Article(article_link, config=config)
+        article.download()
+        article.parse()
+        return article.text
+    except newspaper.article.ArticleException as e:
+        logging.error(f"Error scraping {article_link}: {e}")
+        return None
+
+
+def filter_articles_by_date(items, target_date, timezone_str="Asia/Ho_Chi_Minh"):
+    """Filter articles published on a specific date"""
+    target_date = datetime.datetime.strptime(target_date, "%Y-%m-%d")
+    target_date = target_date.astimezone(pytz.timezone(timezone_str)).strftime(
+        "%Y-%m-%d"
+    )
+    return [
+        item
+        for item in items
+        if parse(item["published"]).strftime("%Y-%m-%d") == target_date
+    ]
+
+
+def process_article_item(item, category, excluded_sources):
+    """Process a single article item from RSS feed"""
+    if any(source in item["link"] for source in excluded_sources):
+        return None
+
+    article = [
+        str(uuid.uuid4()),  # UUID as unique identifier
+        item["link"],
+        item["title"],
+        parse(item["published"]).strftime("%Y-%m-%d"),
+        category,
+    ]
+
+    # Special treatments for certain sources
+    if "vnanet.vn" in article[1]:
+        article[1] = open_vnanet_article(article[1])
+    if "thanhnien.vn" in article[1]:
+        article[2] = fix_thanhnien_title(article[2])
+
+    content = article_content_scraper(article[1])
+    article.append(content if content else article[2])
+    return article
+
+
+def scrape_rss(rss_link, category=None, filter_date=None):
+    """Scrape all articles' links from rss_link"""
     try:
         rss = feedparser.parse(rss_link)
     except Exception as e:
-        print(rss_link, e)
+        logging.error(f"Error parsing RSS feed {rss_link}: {e}")
         return [], []
 
-    print('Total articles:', len(rss['items']))
-
-    # load all excluded sources
-    with open('docs/excluded-sources.txt', 'r') as f:
+    with open("docs/excluded-sources.txt", "r") as f:
         excluded_sources = f.read().splitlines()
 
-    if today_only:
-        vietnam_tz = pytz.timezone('Asia/Ho_Chi_Minh')
-        today = datetime.datetime.now(tz=vietnam_tz)
-        today = today.strftime('%Y-%m-%d')
+    if filter_date:
+        rss["items"] = filter_articles_by_date(rss["items"], filter_date)
 
-        rss['items'] = [item for item in rss['items'] if parse(item['published']).strftime('%Y-%m-%d') == today]
+    logging.info(f"Collected articles: {len(rss['items'])}")
 
-    articles = []
-    err_articles = []
-    for item in rss['items']:
-        # check if source is excluded
-        excluded = any(source in item['link'] for source in excluded_sources)
-        if not excluded:
-            article = [item['link'], item['title'], parse(item['published']).strftime('%Y-%m-%d'), category]
-            articles.append(article)
-
-    for article in articles:
-        # Article links from vnnet.vn need special treatment
-        if 'vnanet.vn' in article[0]:
-            article[0] = open_vnanet_article(article[0])
-
-        if 'thanhnien.vn' in article[0]:
-            article[1] = fix_thanhnien_title(article[1])
-
-        try:
-            # Try to scrape article content, if failed, use article title as content
-            content = article_content_scraper(article[0])
-            if len(content) < len(article[1]):
-                content = article[1]
-            article.append(content)
-        except newspaper.article.ArticleException as e:
-            article.append(article[1])
-            err_articles.append(article[0])
-            print(article[0], e)
+    articles, err_articles = [], []
+    for item in rss["items"]:
+        processed_article = process_article_item(item, category, excluded_sources)
+        if processed_article:
+            articles.append(processed_article)
+        else:
+            err_articles.append(item["link"])
 
     return articles, err_articles
 
-def main(args):
-    # Get all file dir in docs/news-sources
-    files = os.listdir('docs/news-sources')
-    
-    articles = []
-    err_articles = []
 
+def main(args):
+    files = os.listdir(args.dir)
+
+    articles, err_articles = [], []
     for file in files:
-        with open(args.dir + file, 'r') as f:
-            rss_links = f.readlines()
-            rss_links = [rss_link.strip() for rss_link in rss_links]
-            category = file.split('.')[0]
+        with open(os.path.join(args.dir, file), "r") as f:
+            rss_links = [rss_link.strip() for rss_link in f.readlines()]
+            category = os.path.splitext(file)[0]
 
             for rss_link in rss_links:
-                print('Scraping', rss_link)
-                rss_articles, rss_err_articles = scrape_rss(rss_link, category, args.today)
-                if rss_articles:
-                    articles.extend(rss_articles)
-                    err_articles.extend(rss_err_articles)
+                logging.info(f"Scraping {rss_link}")
+                rss_articles, rss_err_articles = scrape_rss(
+                    rss_link, category, args.date
+                )
+                articles.extend(rss_articles)
+                err_articles.extend(rss_err_articles)
 
-    # Export to csv
-    df = pd.DataFrame(articles, columns=['url', 'title', 'pubDate', 'category', 'content'])
+    df = pd.DataFrame(
+        articles, columns=["id", "url", "title", "pubDate", "category", "content"]
+    )
+    df = df.drop_duplicates(subset=["url"])
 
-    # Remove duplicate articles
-    df = df.drop_duplicates(subset=['url'])
-
-    # For articles with no content, use title as content
-    df['content'] = df['content'].fillna(df['title'])
-    
-    df.index.name = 'id'
-
-    # Check if output dir exists
     if not os.path.exists(args.output):
         os.makedirs(args.output)
 
-    df.to_csv(args.output + 'articles.csv', index='id')
+    if args.date:
+        file_name = f"articles_{args.date}.csv"
+    else:
+        file_name = "articles.csv"
 
-    # Export error articles to txt
-    with open(args.output + 'error-articles.txt', 'w') as f:
-        for err_article in err_articles:
-            f.write(err_article + '\n')
+    df.to_csv(os.path.join(args.output, file_name), index=False)
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Scrape articles from rss links')
+    with open(os.path.join(args.output, "error-articles.txt"), "w") as f:
+        f.writelines(err_article + "\n" for err_article in err_articles)
 
-    parser.add_argument('-d', '--dir', help='Path to rss links', default='docs/news-sources/')
-    parser.add_argument('-o', '--output', help='Path to output csv file', default='data/')
 
-    # argument to scrape articles from today only
-    parser.add_argument('--today', help='Scrape articles from today only', default=False)
-
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Scrape articles from rss links")
+    parser.add_argument(
+        "-d", "--dir", help="Path to rss links", default="docs/news-sources/"
+    )
+    parser.add_argument(
+        "-o", "--output", help="Path to output csv file", default="data/"
+    )
+    parser.add_argument(
+        "--date", help="Scrape articles from a specific date (YYYY-MM-DD)"
+    )
     args = parser.parse_args()
     main(args)
