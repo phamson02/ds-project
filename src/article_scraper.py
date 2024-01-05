@@ -14,7 +14,7 @@ from utils import open_vnanet_article, fix_thanhnien_title
 
 # Setting up logging
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s", force=True
 )
 
 USER_AGENT = (
