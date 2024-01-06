@@ -155,26 +155,37 @@ def main(arg):
 
 def process_links(df_link):
     """
-    Process the link DataFrame to remove duplicates and calculate weights.
+    Process the link DataFrame to combine links between the same nodes and aggregate article IDs.
     """
+    # Create a sorted combination of 'from' and 'to' to identify unique links.
     df_link["from_to"] = df_link.apply(
-        lambda x: " ".join(sorted([x["from"], x["to"]])), axis=1
+        lambda x: "///".join(sorted([x["from"], x["to"]])), axis=1
     )
-    df_link.drop_duplicates(subset=["from_to", "article_ids"], inplace=True)
-    df_link.drop("from_to", axis=1, inplace=True)
 
-    df_link = (
-        df_link.groupby(["from", "to"])
+    # Aggregate the links.
+    aggregated_links = (
+        df_link.groupby("from_to")
         .agg(
             {
-                "id": lambda x: x.iloc[0],
-                "article_ids": lambda x: list(x),
+                "id": lambda ids: ids.iloc[0],  # Preserve one ID from the group.
+                "article_ids": lambda article_ids: list(
+                    set(article_ids)
+                ),  # Combine all article IDs.
             }
         )
         .reset_index()
     )
-    df_link["weight"] = df_link["article_ids"].apply(len)
-    return df_link
+
+    # Split 'from_to' back into 'from' and 'to', and calculate the weight.
+    aggregated_links[["from", "to"]] = aggregated_links["from_to"].str.split(
+        "///", expand=True
+    )
+    aggregated_links["weight"] = aggregated_links["article_ids"].apply(len)
+
+    # Drop the 'from_to' column as it's no longer needed.
+    aggregated_links.drop("from_to", axis=1, inplace=True)
+
+    return aggregated_links
 
 
 if __name__ == "__main__":
